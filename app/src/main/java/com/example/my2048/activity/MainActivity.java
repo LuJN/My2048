@@ -37,6 +37,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mBtnRevert = (Button) findViewById(R.id.id_btn_revert);
         mBtnRestart = (Button) findViewById(R.id.id_btn_restart);
         mBtnOptions = (Button) findViewById(R.id.id_btn_options);
+        Config.gameGoal = Config.sp.getInt(Config.KEY_GAME_GOAL, 2048);
+        Config.gameScore = Config.sp.getInt(Config.KEY_GAME_SCORE, 0);
+        Config.gameRecord = Config.sp.getInt(Config.KEY_GAME_RECORD, 0);
         mTvGoal.setText("" + Config.gameGoal);
         mTvScore.setText("" + Config.gameScore);
         mTvRecord.setText("" + Config.gameRecord);

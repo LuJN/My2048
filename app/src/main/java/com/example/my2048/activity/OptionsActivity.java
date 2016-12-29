@@ -28,10 +28,14 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
         mBtnGoal.setOnClickListener(this);
         mBtnBack.setOnClickListener(this);
         mBtnDone.setOnClickListener(this);
-        mSoundAction.setChecked(Config.soundAction);
-        mSoundBackground.setChecked(Config.soundBackground);
+        Config.gameLines = Config.sp.getInt(Config.KEY_GAME_LINES, 4);
+        Config.gameGoal = Config.sp.getInt(Config.KEY_GAME_GOAL, 2048);
+        Config.soundAction = Config.sp.getBoolean(Config.KEY_SOUND_ACTION, false);
+        Config.soundBackground = Config.sp.getBoolean(Config.KEY_SOUND_BACKGROUND, false);
         mBtnLines.setText("" + Config.gameLines);
         mBtnGoal.setText("" + Config.gameGoal);
+        mSoundAction.setChecked(Config.soundAction);
+        mSoundBackground.setChecked(Config.soundBackground);
     }
 
     private void initViews() {
@@ -85,8 +89,8 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
         SharedPreferences.Editor editor = Config.sp.edit();
         editor.putInt(Config.KEY_GAME_LINES, Integer.parseInt(mBtnLines.getText().toString()));
         editor.putInt(Config.KEY_GAME_GOAL, Integer.parseInt(mBtnGoal.getText().toString()));
+        editor.putBoolean(Config.KEY_SOUND_ACTION, mSoundAction.isChecked());
+        editor.putBoolean(Config.KEY_SOUND_BACKGROUND, mSoundBackground.isChecked());
         editor.commit();
-        Config.soundAction = mSoundAction.isChecked();
-        Config.soundBackground = mSoundBackground.isChecked();
     }
 }

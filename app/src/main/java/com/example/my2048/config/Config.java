@@ -22,6 +22,7 @@ public class Config extends Application {
     public static SharedPreferences sp;
     public static final String SP_NAME = "sp";
     public static final String KEY_GAME_GOAL = "goal";
+    public static final String KEY_GAME_SCORE = "score";
     public static final String KEY_GAME_RECORD = "record";
     public static final String KEY_GAME_LINES = "lines";
     public static final String KEY_SOUND_ACTION = "sound_action";
@@ -32,7 +33,7 @@ public class Config extends Application {
         super.onCreate();
         sp = getSharedPreferences(SP_NAME, MODE_PRIVATE);
         gameGoal = sp.getInt(KEY_GAME_GOAL, 2048);
-        gameScore = 0;
+        gameScore = sp.getInt(KEY_GAME_SCORE, 0);
         gameRecord = sp.getInt(KEY_GAME_RECORD, 0);
         gameLines = sp.getInt(KEY_GAME_LINES, 4);
         soundAction = sp.getBoolean(KEY_SOUND_ACTION, false);

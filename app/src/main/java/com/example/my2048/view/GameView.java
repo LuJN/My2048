@@ -76,9 +76,11 @@ public class GameView extends GridLayout implements View.OnTouchListener {
         mItemSize = outMetrics.widthPixels / Config.gameLines;
         setColumnCount(Config.gameLines);
         setRowCount(Config.gameLines);
+        Config.soundAction = Config.sp.getBoolean(Config.KEY_SOUND_ACTION, false);
         initGameMatrix();
         setOnTouchListener(this);
-        // 背景音乐
+        // 开始或停止播放背景音乐
+        Config.soundBackground = Config.sp.getBoolean(Config.KEY_SOUND_BACKGROUND, false);
         Intent intent = new Intent(getContext(), SoundService.class);
         if(Config.soundBackground) {
             getContext().startService(intent);
@@ -185,6 +187,13 @@ public class GameView extends GridLayout implements View.OnTouchListener {
                 if(isMove()) {
                     addRandomNum();
                     ((MainActivity)getContext()).setScoreText(Config.gameScore);
+                    if(Config.gameScore > Config.gameRecord) {
+                        SharedPreferences.Editor editor = Config.sp.edit();
+                        editor.putInt(Config.KEY_GAME_RECORD, Config.gameScore);
+                        editor.commit();
+                        Config.gameRecord = Config.gameScore;
+                        ((MainActivity)getContext()).setRecordText(Config.gameRecord);
+                    }
                     showGameResult();
                 }
                 break;
@@ -549,7 +558,9 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      * 重新开始游戏
      */
     public void startGame() {
-        Config.gameScore = 0;
+        Config.gameGoal = Config.sp.getInt(Config.KEY_GAME_GOAL, 2048);
+        Config.gameScore = Config.sp.getInt(Config.KEY_GAME_SCORE, 0);
+        Config.gameRecord = Config.sp.getInt(Config.KEY_GAME_RECORD, 0);
         ((MainActivity)getContext()).setGoalText(Config.gameGoal);
         ((MainActivity)getContext()).setScoreText(Config.gameScore);
         ((MainActivity)getContext()).setRecordText(Config.gameRecord);
