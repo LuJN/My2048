@@ -12,6 +12,8 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.EditText;
 import android.widget.GridLayout;
 
@@ -147,10 +149,23 @@ public class GameView extends GridLayout implements View.OnTouchListener {
             Point pointRandom = mBlankList.get(indexRandom);
             int numRandom = Math.random() > 0.2 ? 2 : 4;
             mGameMatrix[pointRandom.x][pointRandom.y].setNum(numRandom);
+            // 动画
+            animStart(mGameMatrix[pointRandom.x][pointRandom.y]);
+            // 音效
             if(Config.soundAction) {
                 playSoundAction(SOUND_ACTION);
             }
         }
+    }
+
+    /**
+     * 播放动画
+     */
+    private void animStart(GameItem gameItem) {
+        ScaleAnimation sa = new ScaleAnimation(0.1f, 1.0f, 0.1f, 1.0f, Animation.RELATIVE_TO_SELF,
+                0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        sa.setDuration(100);
+        gameItem.getItemView().startAnimation(sa);
     }
 
     /**

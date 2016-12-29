@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.text.TextPaint;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -97,5 +98,9 @@ public class GameItem extends FrameLayout {
 
     public int getNum() {
         return showNum;
+    }
+
+    public View getItemView() {
+        return tvNum;
     }
 }
