@@ -2,6 +2,7 @@ package com.example.my2048.activity;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,30 +13,29 @@ import android.widget.Switch;
 import com.example.my2048.R;
 import com.example.my2048.config.Config;
 
-public class OptionsActivity extends AppCompatActivity implements View.OnClickListener {
+public class ConfigActivity extends AppCompatActivity implements View.OnClickListener {
     private Button mBtnLines, mBtnGoal, mBtnBack, mBtnDone;
     private AlertDialog.Builder mBuilder;
     private String[] mLinesArray, mGoalArray;
     private Switch mSoundAction, mSoundBackground;
+    // 是否改变游戏行列数和最终分数
+    private boolean mChangeFlag;
+    public static final String EXTRA_CHANGE_FLAG = "change_flag";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_options);
+        setContentView(R.layout.activity_config);
 
         initViews();
-        mBtnLines.setOnClickListener(this);
-        mBtnGoal.setOnClickListener(this);
-        mBtnBack.setOnClickListener(this);
-        mBtnDone.setOnClickListener(this);
-        Config.gameLines = Config.sp.getInt(Config.KEY_GAME_LINES, 4);
-        Config.gameGoal = Config.sp.getInt(Config.KEY_GAME_GOAL, 2048);
-        Config.soundAction = Config.sp.getBoolean(Config.KEY_SOUND_ACTION, false);
-        Config.soundBackground = Config.sp.getBoolean(Config.KEY_SOUND_BACKGROUND, false);
         mBtnLines.setText("" + Config.gameLines);
         mBtnGoal.setText("" + Config.gameGoal);
         mSoundAction.setChecked(Config.soundAction);
         mSoundBackground.setChecked(Config.soundBackground);
+        mBtnLines.setOnClickListener(this);
+        mBtnGoal.setOnClickListener(this);
+        mBtnBack.setOnClickListener(this);
+        mBtnDone.setOnClickListener(this);
     }
 
     private void initViews() {
@@ -76,7 +76,9 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
                 break;
             case R.id.id_btn_done:
                 saveConfig();
-                setResult(RESULT_OK);
+                Intent data = new Intent();
+                data.putExtra(EXTRA_CHANGE_FLAG, mChangeFlag);
+                setResult(RESULT_OK, data);
                 finish();
                 break;
         }
@@ -86,11 +88,22 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
      * 保存设置
      */
     private void saveConfig() {
+        // 设置mChangeFlag1和mChangeFlag2
+        int gameLines = Integer.parseInt(mBtnLines.getText().toString());
+        int gameGoal = Integer.parseInt(mBtnGoal.getText().toString());
+        if(gameLines != Config.gameLines || gameGoal != Config.gameGoal) {
+            mChangeFlag = true;
+        }
+
         SharedPreferences.Editor editor = Config.sp.edit();
         editor.putInt(Config.KEY_GAME_LINES, Integer.parseInt(mBtnLines.getText().toString()));
         editor.putInt(Config.KEY_GAME_GOAL, Integer.parseInt(mBtnGoal.getText().toString()));
         editor.putBoolean(Config.KEY_SOUND_ACTION, mSoundAction.isChecked());
         editor.putBoolean(Config.KEY_SOUND_BACKGROUND, mSoundBackground.isChecked());
         editor.commit();
+        Config.gameLines = Config.sp.getInt(Config.KEY_GAME_LINES, 4);
+        Config.gameGoal = Config.sp.getInt(Config.KEY_GAME_GOAL, 2048);
+        Config.soundAction = Config.sp.getBoolean(Config.KEY_SOUND_ACTION, false);
+        Config.soundBackground = Config.sp.getBoolean(Config.KEY_SOUND_BACKGROUND, false);
     }
 }

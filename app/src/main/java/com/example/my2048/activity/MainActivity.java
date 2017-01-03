@@ -37,9 +37,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mBtnRevert = (Button) findViewById(R.id.id_btn_revert);
         mBtnRestart = (Button) findViewById(R.id.id_btn_restart);
         mBtnOptions = (Button) findViewById(R.id.id_btn_options);
-        Config.gameGoal = Config.sp.getInt(Config.KEY_GAME_GOAL, 2048);
-        Config.gameScore = Config.sp.getInt(Config.KEY_GAME_SCORE, 0);
-        Config.gameRecord = Config.sp.getInt(Config.KEY_GAME_RECORD, 0);
         mTvGoal.setText("" + Config.gameGoal);
         mTvScore.setText("" + Config.gameScore);
         mTvRecord.setText("" + Config.gameRecord);
@@ -58,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 mGameView.startGame();
                 break;
             case R.id.id_btn_options:
-                Intent intent = new Intent(MainActivity.this, OptionsActivity.class);
+                Intent intent = new Intent(MainActivity.this, ConfigActivity.class);
                 startActivityForResult(intent, REQUEST_CODE);
                 break;
         }
@@ -72,7 +69,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         switch(requestCode) {
             case REQUEST_CODE:
-                mGameView.startGame();
+                // 是否改变游戏行列数和游戏最终数字
+                boolean changeFlag = data.getBooleanExtra(ConfigActivity.EXTRA_CHANGE_FLAG, false);
+                if(changeFlag) {
+                    mGameView.startGame();
+                }
                 break;
             default:
                 break;
@@ -89,6 +90,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void setRecordText(int record) {
         mTvRecord.setText("" + record);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent = new Intent(this, SoundService.class);
+        if(Config.soundBackground) {
+            intent.putExtra(SoundService.EXTRA_OPERATE, SoundService.PLAY);
+            startService(intent);
+        } else {
+            stopService(intent);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(Config.soundBackground) {
+            Intent intent = new Intent(this, SoundService.class);
+            intent.putExtra(SoundService.EXTRA_OPERATE, SoundService.PAUSE);
+            startService(intent);
+        }
     }
 
     @Override

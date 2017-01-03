@@ -9,6 +9,9 @@ import com.example.my2048.R;
 
 public class SoundService extends Service {
     private MediaPlayer mPlayer;
+    public static final String EXTRA_OPERATE = "operate";
+    public static final int PLAY = 0;
+    public static final int PAUSE = 1;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -23,14 +26,30 @@ public class SoundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        mPlayer.setLooping(true);
-        mPlayer.start();
+        int operate = intent.getIntExtra(EXTRA_OPERATE, PLAY);
+        switch (operate) {
+            case PLAY:
+                if (!mPlayer.isPlaying()) {
+                    mPlayer.setLooping(true);
+                    mPlayer.start();
+                }
+                break;
+            case PAUSE:
+                if(mPlayer.isPlaying()) {
+                    mPlayer.pause();
+                }
+                break;
+            default:
+                break;
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
-        mPlayer.stop();
+        if(mPlayer.isPlaying()) {
+            mPlayer.stop();
+        }
         mPlayer.release();
         super.onDestroy();
     }

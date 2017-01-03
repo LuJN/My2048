@@ -3,7 +3,6 @@ package com.example.my2048.view;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.media.AudioManager;
@@ -21,7 +20,6 @@ import com.example.my2048.R;
 import com.example.my2048.activity.MainActivity;
 import com.example.my2048.bean.GameItem;
 import com.example.my2048.config.Config;
-import com.example.my2048.service.SoundService;
 import com.example.my2048.util.DisplayUtil;
 
 import java.util.ArrayList;
@@ -33,6 +31,8 @@ import java.util.Map;
  * Created by Administrator on 2016/12/27.
  */
 public class GameView extends GridLayout implements View.OnTouchListener {
+    // 游戏行列数
+    private int mGameLines;
     // 方块大小
     private int mItemSize;
     // 方块矩阵
@@ -72,23 +72,13 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      */
     public void initGameView() {
         removeAllViews();
-        Config.gameGoal = Config.sp.getInt(Config.KEY_GAME_GOAL, 2048);
-        Config.gameLines = Config.sp.getInt(Config.KEY_GAME_LINES, 4);
+        mGameLines = Config.gameLines;
         DisplayMetrics outMetrics =  DisplayUtil.getScreenSize(getContext());
-        mItemSize = outMetrics.widthPixels / Config.gameLines;
-        setColumnCount(Config.gameLines);
-        setRowCount(Config.gameLines);
-        Config.soundAction = Config.sp.getBoolean(Config.KEY_SOUND_ACTION, false);
+        mItemSize = outMetrics.widthPixels /  mGameLines;
+        setColumnCount( mGameLines);
+        setRowCount( mGameLines);
         initGameMatrix();
         setOnTouchListener(this);
-        // 开始或停止播放背景音乐
-        Config.soundBackground = Config.sp.getBoolean(Config.KEY_SOUND_BACKGROUND, false);
-        Intent intent = new Intent(getContext(), SoundService.class);
-        if(Config.soundBackground) {
-            getContext().startService(intent);
-        } else {
-            getContext().stopService(intent);
-        }
     }
 
     /**
@@ -118,25 +108,25 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      * 初始化矩阵
      */
     private void initGameMatrix() {
-        mGameMatrix = new GameItem[Config.gameLines][Config.gameLines];
+        mGameMatrix = new GameItem[mGameLines][mGameLines];
         GameItem item = null;
-        for (int i = 0; i < Config.gameLines; i++) {
-            for (int j = 0; j < Config.gameLines; j++) {
+        for (int i = 0; i <  mGameLines; i++) {
+            for (int j = 0; j <  mGameLines; j++) {
                 item = new GameItem(getContext(), 0);
                 mGameMatrix[i][j] = item;
                 addView(item, mItemSize, mItemSize);
             }
         }
         mBlankList = new ArrayList<>();
-        for (int i = 0; i < Config.gameLines; i++) {
-            for (int j = 0; j < Config.gameLines; j++) {
+        for (int i = 0; i < mGameLines; i++) {
+            for (int j = 0; j < mGameLines; j++) {
                 mBlankList.add(new Point(i, j));
             }
         }
         addRandomNum();
         addRandomNum();
         mCalList = new ArrayList<>();
-        mGameMatrixHistory = new int[Config.gameLines][Config.gameLines];
+        mGameMatrixHistory = new int[mGameLines][mGameLines];
     }
 
     /**
@@ -173,8 +163,8 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      */
     private void getBlankList() {
         mBlankList.clear();
-        for (int i = 0; i < Config.gameLines; i++) {
-            for (int j = 0; j < Config.gameLines; j++) {
+        for (int i = 0; i < mGameLines; i++) {
+            for (int j = 0; j < mGameLines; j++) {
                 if(mGameMatrix[i][j].getNum() == 0) {
                     mBlankList.add(new Point(i, j));
                 }
@@ -268,8 +258,8 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      */
     private int checkGameState() {
         // 检查是否有最终数字
-        for (int i = 0; i < Config.gameLines; i++) {
-            for (int j = 0; j < Config.gameLines; j++) {
+        for (int i = 0; i < mGameLines; i++) {
+            for (int j = 0; j < mGameLines; j++) {
                 if(mGameMatrix[i][j].getNum() == Config.gameGoal) {
                     return GAME_SUCCESS;
                 }
@@ -280,14 +270,14 @@ public class GameView extends GridLayout implements View.OnTouchListener {
         if(mBlankList.size() != 0) {
             return GAME_NORMAL;
         }
-        for (int i = 0; i < Config.gameLines; i++) {
-            for (int j = 0; j < Config.gameLines; j++) {
-                if(i < Config.gameLines - 1) {
+        for (int i = 0; i < mGameLines; i++) {
+            for (int j = 0; j < mGameLines; j++) {
+                if(i < mGameLines - 1) {
                     if(mGameMatrix[i][j].getNum() == mGameMatrix[i + 1][j].getNum()) {
                         return GAME_NORMAL;
                     }
                 }
-                if(j < Config.gameLines - 1) {
+                if(j < mGameLines - 1) {
                     if(mGameMatrix[i][j].getNum() == mGameMatrix[i][j + 1].getNum()) {
                         return GAME_NORMAL;
                     }
@@ -302,8 +292,8 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      */
     private void saveGameMatrixHistory() {
         mScoreHistory = Config.gameScore;
-        for (int i = 0; i < Config.gameLines; i++) {
-            for (int j = 0; j < Config.gameLines; j++) {
+        for (int i = 0; i < mGameLines; i++) {
+            for (int j = 0; j < mGameLines; j++) {
                 mGameMatrixHistory[i][j] = mGameMatrix[i][j].getNum();
             }
         }
@@ -313,8 +303,8 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      * 判断是否移动了
      */
     private boolean isMove() {
-        for (int i = 0; i < Config.gameLines; i++) {
-            for (int j = 0; j < Config.gameLines; j++) {
+        for (int i = 0; i < mGameLines; i++) {
+            for (int j = 0; j < mGameLines; j++) {
                 if(mGameMatrix[i][j].getNum() != mGameMatrixHistory[i][j]) {
                     return true;
                 }
@@ -374,8 +364,8 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      * 滑动事件：上
      */
     private void swipeUp() {
-        for (int column = 0; column < Config.gameLines; column++) {
-            for (int row = 0; row < Config.gameLines; row++) {
+        for (int column = 0; column < mGameLines; column++) {
+            for (int row = 0; row < mGameLines; row++) {
                 mCurrentNum = mGameMatrix[row][column].getNum();
                 if(mCurrentNum != 0) {
                     if(mKeyNum == -1) {
@@ -400,7 +390,7 @@ public class GameView extends GridLayout implements View.OnTouchListener {
             for (int row = 0; row < mCalList.size(); row++) {
                 mGameMatrix[row][column].setNum(mCalList.get(row));
             }
-            for (int row = mCalList.size(); row < Config.gameLines; row++) {
+            for (int row = mCalList.size(); row < mGameLines; row++) {
                 mGameMatrix[row][column].setNum(0);
             }
             mKeyNum = -1;
@@ -412,8 +402,8 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      * 滑动事件：下
      */
     private void swipeDown() {
-        for (int column = 0; column < Config.gameLines; column++) {
-            for (int row = Config.gameLines - 1; row >= 0; row--) {
+        for (int column = 0; column < mGameLines; column++) {
+            for (int row = mGameLines - 1; row >= 0; row--) {
                 mCurrentNum = mGameMatrix[row][column].getNum();
                 if(mCurrentNum != 0) {
                     if(mKeyNum == -1) {
@@ -435,11 +425,11 @@ public class GameView extends GridLayout implements View.OnTouchListener {
             if(mKeyNum != -1) {
                 mCalList.add(mKeyNum);
             }
-            for (int row = 0; row < Config.gameLines - mCalList.size(); row++) {
+            for (int row = 0; row < mGameLines - mCalList.size(); row++) {
                 mGameMatrix[row][column].setNum(0);
             }
             int index = mCalList.size() - 1;
-            for (int row = Config.gameLines - mCalList.size(); row < Config.gameLines; row++) {
+            for (int row = mGameLines - mCalList.size(); row < mGameLines; row++) {
                 mGameMatrix[row][column].setNum(mCalList.get(index));
                 index--;
             }
@@ -452,8 +442,8 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      * 滑动事件：左
      */
     private void swipeLeft() {
-        for (int row = 0; row < Config.gameLines; row++) {
-            for (int column = 0; column < Config.gameLines; column++) {
+        for (int row = 0; row < mGameLines; row++) {
+            for (int column = 0; column < mGameLines; column++) {
                 mCurrentNum = mGameMatrix[row][column].getNum();
                 if(mCurrentNum != 0) {
                     if(mKeyNum == -1) {
@@ -478,7 +468,7 @@ public class GameView extends GridLayout implements View.OnTouchListener {
             for (int column = 0; column < mCalList.size(); column++) {
                 mGameMatrix[row][column].setNum(mCalList.get(column));
             }
-            for (int column = mCalList.size(); column < Config.gameLines; column++) {
+            for (int column = mCalList.size(); column < mGameLines; column++) {
                 mGameMatrix[row][column].setNum(0);
             }
             mKeyNum = -1;
@@ -490,8 +480,8 @@ public class GameView extends GridLayout implements View.OnTouchListener {
      * 滑动事件：右
      */
     private void swipeRight() {
-        for (int row = 0; row < Config.gameLines; row++) {
-            for (int column = Config.gameLines - 1; column >= 0; column--) {
+        for (int row = 0; row < mGameLines; row++) {
+            for (int column = mGameLines - 1; column >= 0; column--) {
                 mCurrentNum = mGameMatrix[row][column].getNum();
                 if(mCurrentNum != 0) {
                     if(mKeyNum == -1) {
@@ -513,11 +503,11 @@ public class GameView extends GridLayout implements View.OnTouchListener {
             if(mKeyNum != -1) {
                 mCalList.add(mKeyNum);
             }
-            for (int column = 0; column < Config.gameLines - mCalList.size(); column++) {
+            for (int column = 0; column < mGameLines - mCalList.size(); column++) {
                 mGameMatrix[row][column].setNum(0);
             }
             int index = mCalList.size() - 1;
-            for (int column = Config.gameLines - mCalList.size(); column < Config.gameLines; column++) {
+            for (int column = mGameLines - mCalList.size(); column < mGameLines; column++) {
                 mGameMatrix[row][column].setNum(mCalList.get(index));
                 index--;
             }
@@ -553,16 +543,16 @@ public class GameView extends GridLayout implements View.OnTouchListener {
     public void revert() {
         // 未保存过历史数字矩阵，不能撤销
         int sum = 0;
-        for (int i = 0; i < Config.gameLines; i++) {
-            for (int j = 0; j < Config.gameLines; j++) {
+        for (int i = 0; i < mGameLines; i++) {
+            for (int j = 0; j < mGameLines; j++) {
                 sum += mGameMatrixHistory[i][j];
             }
         }
         if(sum != 0) {
             Config.gameScore = mScoreHistory;
             ((MainActivity)getContext()).setScoreText(Config.gameScore);
-            for (int i = 0; i < Config.gameLines; i++) {
-                for (int j = 0; j < Config.gameLines; j++) {
+            for (int i = 0; i < mGameLines; i++) {
+                for (int j = 0; j < mGameLines; j++) {
                     mGameMatrix[i][j].setNum(mGameMatrixHistory[i][j]);
                 }
             }
